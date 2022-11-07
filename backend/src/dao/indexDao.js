@@ -1,13 +1,33 @@
 const { pool } = require("../../config/database");
 
+// 로그인 (회원검증)
+exports.isValidUsers = async function (connection, userID, password) {
+  const Query = `SELECT userIdx, nickname FROM T_USER_INFO where userID = ? and password = ? and status = 'A';`;
+  const Params = [userID, password];
+
+  const rows = await connection.query(Query, Params);
+
+  return rows;
+};
+
+// 회원가입
+exports.insertUsers = async function (connection, userID, password, nickname) {
+  const Query = `INSERT INTO T_USER_INFO(userID, password, nickname) values (?,?,?);`;
+  const Params = [userID, password, nickname];
+
+  const rows = await connection.query(Query, Params);
+
+  return rows;
+};
+
 exports.selectRestaurants = async function (connection, category) {
-  // 쿼리로 하는 방법
-  const selectAllRestaurantsQuery = `SELECT title, address, category, videoUrl FROM T_RESTAURANT_INFO WHERE status = 'A';`;
-  const selectRestaurantsByCategoryQuery = `SELECT title, address, category, videoUrl FROM T_RESTAURANT_INFO WHERE status = 'A' AND category = ?;`;
+  const selectAllRestaurantsQuery = `SELECT title, address, category, videoUrl FROM T_RESTAURANT_INFO where status = 'A';`;
+  const selectCategorizedRestaurantsQuery = `SELECT title, address, category, videoUrl FROM T_RESTAURANT_INFO where status = 'A' and category = ?;`;
+
   const Params = [category];
 
   const Query = category
-    ? selectRestaurantsByCategoryQuery
+    ? selectCategorizedRestaurantsQuery
     : selectAllRestaurantsQuery;
 
   const rows = await connection.query(Query, Params);
@@ -15,92 +35,69 @@ exports.selectRestaurants = async function (connection, category) {
   return rows;
 };
 
-exports.isValidStudentIdx = async function (connection, studentIdx) {
-  const Query = `SELECT * FROM Students WHERE studentIdx = ? AND status = 'A';`;
-  const Params = [studentIdx];
+// exports.deleteStudent = async function (connection, studentIdx) {
+//   const Query = `update Students set status = "D" where studentIdx = ?;`;
+//   const Params = [studentIdx];
 
-  const [rows] = await connection.query(Query, Params);
+//   const rows = await connection.query(Query, Params);
 
-  if (rows < 1) {
-    return false;
-  }
+//   return rows;
+// };
 
-  return true;
-};
+// exports.updateStudents = async function (
+//   connection,
+//   studentIdx,
+//   studentName,
+//   major,
+//   birth,
+//   address
+// ) {
+//   const Query = `update Students set studentName = ifnull(?, studentName), major = ifnull(?, major), birth = ifnull(?, birth), address = ifnull(?, address) where studentIdx = ?;`;
+//   const Params = [studentName, major, birth, address, studentIdx];
 
-exports.deleteStudent = async function (connection, studentIdx) {
-  const Query = `UPDATE Students
-  SET status = 'D'
-  WHERE studentIdx = ?`;
-  const Params = [studentIdx];
+//   const rows = await connection.query(Query, Params);
 
-  const rows = await connection.query(Query, Params);
+//   return rows;
+// };
 
-  return rows;
-};
+// exports.isValidStudentIdx = async function (connection, studentIdx) {
+//   const Query = `SELECT * FROM Students where studentIdx = ? and status = 'A';`;
+//   const Params = [studentIdx];
 
-exports.updateStudents = async function (
-  connection,
-  studentIdx,
-  studentName,
-  major,
-  birth,
-  address
-) {
-  const Query = `UPDATE Students
-  SET studentName = ifnull(?, studentName), major = ifnull(?, major),
-  birth = ifnull(?, birth), address = ifnull(?, address)
-  WHERE studentIdx = ?`;
-  const Params = [studentName, major, birth, address, studentIdx];
+//   const [rows] = await connection.query(Query, Params);
 
-  const rows = await connection.query(Query, Params);
+//   if (rows < 1) {
+//     return false;
+//   }
 
-  return rows;
-};
+//   return true;
+// };
 
-exports.insertStudents = async function (
-  connection,
-  studentName,
-  major,
-  birth,
-  address
-) {
-  const Query = `INSERT INTO Students(studentName,
-    major,
-    birth,
-    address) values(?, ?, ?, ?);`;
-  const Params = [studentName, major, birth, address];
+// exports.insertStudents = async function (
+//   connection,
+//   studentName,
+//   major,
+//   birth,
+//   address
+// ) {
+//   const Query = `insert into Students(studentName, major, birth, address) values (?,?,?,?);`;
+//   const Params = [studentName, major, birth, address];
 
-  const rows = await connection.query(Query, Params);
+//   const rows = await connection.query(Query, Params);
 
-  return rows;
-};
+//   return rows;
+// };
 
-exports.selectStudents = async function (connection, studentIdx) {
-  // 쿼리로 하는 방법
-  // const selectAllStudentsQuery = `SELECT * FROM Students;`;
-  // const selectStudentByNameQuery = `SELECT * FROM Students where studentName = ?;`;
-  // const Params = [studentName];
+// exports.selectStudents = async function (connection, studentIdx) {
+//   const Query = `SELECT * FROM Students where studentIdx = ?;`;
+//   const Params = [studentIdx];
 
-  // let Query = studentName ? selectStudentByNameQuery : selectAllStudentsQuery;
+//   const rows = await connection.query(Query, Params);
 
-  // // if (!studentName) {
-  // //   Query = selectAllStudentsQuery;
-  // // } else {
-  // //   Query = selectStudentByNameQuery;
-  // // }
+//   return rows;
+// };
 
-  // PathVariable로 하는 방법
-  const Query = `SELECT * FROM Students where studentIdx = ?;`;
-  const Params = [studentIdx];
-
-  const rows = await connection.query(Query, Params);
-
-  return rows;
-};
-
-// 예시 코드
-// exports.exampleDao = async function (connection, params) {
+// exports.exampleDao = async function (connection) {
 //   const Query = `SELECT * FROM Students;`;
 //   const Params = [];
 
